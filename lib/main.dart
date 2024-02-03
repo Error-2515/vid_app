@@ -1,60 +1,62 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' as sc;
+import 'package:vid_app/screens/demo.dart';
+// import 'package:stream_video_flutter/stream_video_flutter.dart' ;
 
 Future<void> main() async {
   // Ensure Flutter is able to communicate with Plugins
   WidgetsFlutterBinding.ensureInitialized();
+  
+  final client = sc.StreamChatClient('pgngfnbpjdf2', logLevel: sc.Level.INFO);
 
-    // Initialize Stream video and set the API key along with the user for our app.
-  final client = StreamVideo(
-    'pefx27yhuzzs',
-    user: User.regular(userId: 'hello', name: 'abdullah'),
-    userToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiaGVsbG8ifQ.D0UsX7ACBspeOoaGwL7FUJZ5PoHwlm9pS-3hNTC4uwk',
-    options: const StreamVideoOptions(
-      logPriority: Priority.info,
-    ),
-  );
+  const nameid = 'Super Mario';
+  const userid = 'super_mario_og';
 
-  // Set up our call object
-  final call = client.makeCall(type: 'default', id: '345');
-  await call.getOrCreate();
-  // Connect to the call we created
-  await call.join();
-  final outputDevices = RtcMediaDeviceNotifier.instance.audioOutputs();
-  final inputDevices = RtcMediaDeviceNotifier.instance.audioInputs();
-  // final videoDevices = RtcMediaDeviceNotifier.instance.videoInputs();
-  call.setAudioInputDevice(inputDevices as RtcMediaDevice);
-  call.setAudioOutputDevice(outputDevices as RtcMediaDevice);
-  call.setMicrophoneEnabled(enabled: true);
-  call.setCameraEnabled(enabled: true);
-   runApp(
-    MaterialApp(
-      home: MyApp(
-        call: call,
-      ),
-      debugShowCheckedModeBanner: false,
+  await client.connectUser(
+      sc.User(
+          name: nameid,
+          role: 'admin',
+          image: 'https://th.bing.com/th/id/OIP.XL9QyTVGCB whEM6Cy9KAAAAA?rs=1&pid=ImgDetMain',
+          id: userid),
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic3VwZXJfbWFyaW9fb2cifQ.ffMcvt7Afz6khYJG0RG21YmH1Ez1ddWxwA4mGMem0ss');
+  
+  // final vclient =  StreamVideo(
+  //   'pgngfnbpjdf2',
+  //   user: const User(info: UserInfo(id: userid,name: nameid)),
+  //   userToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic3VwZXJfbWFyaW9fb2cifQ.ffMcvt7Afz6khYJG0RG21YmH1Ez1ddWxwA4mGMem0ss',
+  //   options: const  StreamVideoOptions(
+  //     logPriority:  Priority.info,
+  //   ),
+  // );
+
+  // // Set up our call object
+  // final call = vclient.makeCall(type: 'default', id: '345');
+  // await call.getOrCreate();
+  // // Connect to the call we created
+  // await call.join();
+
+  runApp(
+    MyApp(
+      client: client,
+      
     ),
   );
 }
 
+// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key, required this.call}) : super(key: key);
-
-  final Call call;
+  var client;
+  var call;
+// , required this.call
+  MyApp({Key? key, required this.client}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Directionality(
-        textDirection: TextDirection.ltr, // or TextDirection.rtl based on your app's language direction
-        child: Scaffold(
-          
-          body: StreamCallContainer(
-            call: call,
-           
-          ),
-        ),
-      ),
+      home: sc.StreamChat(client: client, child: const ConView()),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
